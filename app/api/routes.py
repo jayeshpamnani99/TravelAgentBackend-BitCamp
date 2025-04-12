@@ -1,9 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.agents.weather_agent import get_weather
 from app.core.logic import generate_trip_plan
-from app.llm.extract_trip_info import extract_trip_info_from_prompt
+from app.llm.extract_trip_info import extract_trip_info_from_prompt, conversation_state
 from app.agents.foursquare_agent import get_places
+from app.core.trip_storage import trip_storage
+from typing import Optional
+from datetime import datetime
 
 # from app.config import settings
 
@@ -14,14 +17,62 @@ class TripRequest(BaseModel):
     days: int
     interests: list[str]
 
+class ConversationRequest(BaseModel):
+    prompt: str
+    reset: bool = False
+    trip_id: Optional[str] = None
+
 @router.post("/conversation")
-def conversation(prompt: dict):
-    # Extract trip info from prompt
-    print("Prompt", prompt)
-    trip_data = extract_trip_info_from_prompt(prompt['prompt'])
-    print("Trip_data", trip_data)
-    return trip_data
+def conversation(request: ConversationRequest):
+    if request.reset:
+        conversation_state.__init__()  # Reset the conversation state
+        return {"message": "Conversation reset successfully"}
     
+    # Extract trip info from prompt
+    print("Prompt", request.prompt)
+    trip_data = extract_trip_info_from_prompt(request.prompt)
+    print("Trip_data", trip_data)
+    
+    # If we have a trip_id, try to update existing trip or create new one
+    if request.trip_id:
+        existing_trip = trip_storage.get_trip(request.trip_id)
+        if existing_trip:
+            if not trip_storage.update_trip(request.trip_id, trip_data):
+                raise HTTPException(status_code=500, detail="Failed to update trip")
+        else:
+            # Create new trip with the provided trip_id
+            trip_storage.trip_data[request.trip_id] = {
+                "data": trip_data,
+                "created_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat()
+            }
+            trip_storage._save_data()
+        return {"trip_id": request.trip_id, **trip_data}
+    
+    # If trip is complete, create a new trip entry
+    if trip_data.get("is_complete", False):
+        trip_id = trip_storage.create_trip(trip_data)
+        return {"trip_id": trip_id, **trip_data}
+    
+    return trip_data
+
+@router.get("/trip/{trip_id}")
+def get_trip(trip_id: str):
+    trip = trip_storage.get_trip(trip_id)
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return trip
+
+@router.delete("/trip/{trip_id}")
+def delete_trip(trip_id: str):
+    if not trip_storage.delete_trip(trip_id):
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return {"message": "Trip deleted successfully"}
+
+@router.get("/trips")
+def get_all_trips():
+    return trip_storage.get_all_trips()
+
 @router.post("/plan-trip")
 def plan_trip(request: TripRequest):
     plan = generate_trip_plan(request.destination, request.days, request.interests)
