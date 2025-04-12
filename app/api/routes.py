@@ -54,8 +54,9 @@ async def weather_from_prompt():
     }
 
 @router.get("/top-places")
-async def top_places(city: str):
+async def top_places():
     try:
+        city = "Washington, DC"
         places = await get_places(city, category="attractions")
         return {"city": city, "places_to_visit": places}
     except Exception as e:
