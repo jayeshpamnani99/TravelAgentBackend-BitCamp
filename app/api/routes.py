@@ -63,8 +63,9 @@ async def top_places():
         return {"error": str(e)}
 
 @router.get("/restaurants")
-async def restaurants(city: str):
+async def restaurants():
     try:
+        city = "Washington, DC"
         results = await get_places(city, category="restaurants")
         return {"city": city, "restaurants": results}
     except Exception as e:
