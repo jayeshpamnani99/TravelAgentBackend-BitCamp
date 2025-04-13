@@ -105,7 +105,8 @@ async def get_flight_offers(origin: str, destination: str, departure_date: str, 
         "departureDate": departure_date,
         "returnDate": return_date,
         "adults": 1,
-        "max": 5
+        "max": 5,
+        "currencyCode": "USD"  # Request prices in USD
     }
     
     async with httpx.AsyncClient() as client:
@@ -127,6 +128,11 @@ async def get_flight_offers(origin: str, destination: str, departure_date: str, 
                     "origin_code": origin_code,
                     "destination_code": destination_code
                 }
+            
+            # Sort flights by price
+            sorted_flights = sorted(data["data"], key=lambda x: float(x["price"]["total"]))
+            data["data"] = sorted_flights
+            
             return simplify_flight_data(data)
         else:
             return {
