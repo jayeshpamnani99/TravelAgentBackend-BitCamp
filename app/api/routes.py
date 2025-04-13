@@ -7,6 +7,7 @@ from app.agents.foursquare_agent import get_places
 from app.core.trip_storage import trip_storage
 from typing import Optional
 from datetime import datetime
+from app.llm.itinerary import get_itinerary_response
 
 # from app.config import settings
 
@@ -21,6 +22,12 @@ class ConversationRequest(BaseModel):
     prompt: str
     reset: bool = False
     trip_id: Optional[str] = None
+    
+class ItineraryRequest(BaseModel):
+    source: str
+    destination: str
+    start_date: str  # YYYY-MM-DD
+    end_date: str    # YYYY-MM-DD
 
 @router.post("/conversation")
 def conversation(request: ConversationRequest):
@@ -119,5 +126,18 @@ async def restaurants():
         city = "Washington, DC"
         results = await get_places(city, category="restaurants")
         return {"city": city, "restaurants": results}
+    except Exception as e:
+        return {"error": str(e)}
+
+@router.post("/itinerary")
+async def itinerary(req: ItineraryRequest):
+    try:
+        itinerary_text = await get_itinerary_response(
+            "Miami", "Washington DC", "2025-04-25", "2025-04-30"
+        )
+        # itinerary_text = await get_itinerary_response(
+        #     req.source, req.destination, req.start_date, req.end_date
+        # )
+        return {"itinerary": itinerary_text}
     except Exception as e:
         return {"error": str(e)}
