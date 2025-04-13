@@ -10,6 +10,9 @@ from datetime import datetime
 from app.core.trip_storage import TripStorage;
 from app.llm.itinerary import get_itinerary_response
 from app.core.route_summary import get_route_summary
+from app.agents.flight_agent import get_flight_offers
+import json
+
 # from app.config import settings
 
 router = APIRouter()
@@ -189,3 +192,42 @@ async def itinerary(TripInfoWrapper: TripInfoWrapper):
         return {"itinerary": itinerary_text}
     except Exception as e:
         return {"error": str(e)}
+
+@router.post("/search-flights")
+async def search_flights(TripInfoWrapper: TripInfoWrapper):
+    trip_id = TripInfoWrapper.trip_id
+    try:
+        # Read trip data
+        with open("trip_data.json", "r") as file:
+            trips_data = json.load(file)
+        
+        # Check if trip_id exists in the data
+        if trip_id not in trips_data:
+            raise HTTPException(status_code=404, detail="Trip not found")
+        
+        # Get the trip data
+        trip = trips_data[trip_id]
+        trip_info = trip["data"]
+        
+        # Validate required fields
+        required_fields = ["origin", "destination", "start_date", "end_date"]
+        for field in required_fields:
+            if field not in trip_info:
+                raise HTTPException(status_code=500, detail=f"Missing required field: {field}")
+        
+        # Get flight offers
+        flight_offers = await get_flight_offers(
+            origin=trip_info["origin"],
+            destination=trip_info["destination"],
+            departure_date=trip_info["start_date"],
+            return_date=trip_info["end_date"]
+        )
+        
+        return flight_offers
+        
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Invalid JSON data in trip_data.json")
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="trip_data.json file not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
