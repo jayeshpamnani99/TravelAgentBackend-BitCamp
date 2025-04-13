@@ -140,19 +140,6 @@ async def restaurants(TripInfoWrapper: TripInfoWrapper):
         return {"city": city, "restaurants": results}
     except Exception as e:
         return {"error": str(e)}
-
-# @router.post("/itinerary")
-# async def itinerary(req: ItineraryRequest):
-#     try:
-#         itinerary_text = await get_itinerary_response(
-#             "Miami", "Washington DC", "2025-04-25", "2025-04-30"
-#         )
-#         # itinerary_text = await get_itinerary_response(
-#         #     req.source, req.destination, req.start_date, req.end_date
-#         # )
-#         return {"itinerary": itinerary_text}
-#     except Exception as e:
-#         return {"error": str(e)}
     
 @router.post("/route-summary")
 async def route_summary(TripInfoWrapper: TripInfoWrapper):
@@ -166,7 +153,7 @@ async def route_summary(TripInfoWrapper: TripInfoWrapper):
         return {"summary": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.post("/hotels")
 async def hotels(TripInfoWrapper: TripInfoWrapper):
     trip_id = TripInfoWrapper.trip_id
@@ -178,7 +165,18 @@ async def hotels(TripInfoWrapper: TripInfoWrapper):
         results = await get_places(city, category="hotels")
         return {"city": city, "hotels": results}
     except Exception as e:
-        return {"error": str(e)}
+        # More informative error handling
+        error_type = type(e).__name__
+        error_message = str(e) if str(e) else "Unknown error occurred while fetching hotel data"
+        
+        # Handle connection issues with a user-friendly message
+        if "timeout" in error_message.lower() or "connect" in error_message.lower():
+            return {
+                "error": "Connection issue when trying to fetch hotel data. Please try again later.",
+                "technical_details": f"{error_type}: {error_message}"
+            }
+        
+        return {"error": f"{error_type}: {error_message}"}
     
 @router.post("/itinerary")
 async def itinerary(TripInfoWrapper: TripInfoWrapper):
