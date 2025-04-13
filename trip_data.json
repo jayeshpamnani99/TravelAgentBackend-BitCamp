@@ -1,38 +1,14 @@
 {
   "1": {
     "data": {
-      "origin": "",
-      "destination": "Las Vegas",
-      "start_date": "2025-12-31",
-      "end_date": "2026-01-01",
-      "follow_up": "Could you please let me know where you'll be departing from?",
-      "is_complete": false
-    },
-    "created_at": "2025-04-12T22:25:07.655931",
-    "updated_at": "2025-04-12T22:27:55.753791"
-  },
-  "2": {
-    "data": {
-      "origin": "Denver",
-      "destination": "New York",
-      "start_date": "2025-12-29",
-      "end_date": "2025-12-31",
-      "follow_up": "Do you want to proceed with the trip from Denver to New York from December 29th to December 31st?",
-      "is_complete": true
-    },
-    "created_at": "2025-04-12T22:25:29.906738",
-    "updated_at": "2025-04-12T22:26:53.051122"
-  },
-  "3": {
-    "data": {
-      "origin": "Chicago",
-      "destination": "New York",
+      "origin": "New York",
+      "destination": "",
       "start_date": "",
       "end_date": "",
-      "follow_up": "Could you please provide the start and end dates for your trip to New York?",
+      "follow_up": "Where are you traveling to? And what are your desired start and end dates?",
       "is_complete": false
     },
-    "created_at": "2025-04-12T22:25:49.193123",
-    "updated_at": "2025-04-12T22:30:19.134974"
+    "created_at": "2025-04-12T17:45:35.902060",
+    "updated_at": "2025-04-12T17:45:35.902071"
   }
 }
