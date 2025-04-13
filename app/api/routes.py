@@ -2,12 +2,12 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.agents.weather_agent import get_weather
 from app.core.logic import generate_trip_plan
-from app.llm.extract_trip_info import extract_trip_info_from_prompt, conversation_state
+from app.llm.extract_trip_info import extract_trip_info_from_prompt, chat_manager
 from app.agents.foursquare_agent import get_places
 from app.core.trip_storage import trip_storage
 from typing import Optional
 from datetime import datetime
-from app.llm.itinerary import get_itinerary_response
+from app.core.trip_storage import TripStorage;
 
 # from app.config import settings
 
@@ -22,25 +22,17 @@ class ConversationRequest(BaseModel):
     prompt: str
     reset: bool = False
     trip_id: Optional[str] = None
-    
-class ItineraryRequest(BaseModel):
-    source: str
-    destination: str
-    start_date: str  # YYYY-MM-DD
-    end_date: str    # YYYY-MM-DD
 
 @router.post("/conversation")
 def conversation(request: ConversationRequest):
-    if request.reset:
-        conversation_state.__init__()  # Reset the conversation state
+    if request.reset and request.trip_id:
+        chat_manager.close_chat(request.trip_id)
         return {"message": "Conversation reset successfully"}
     
-    # Extract trip info from prompt
-    print("Prompt", request.prompt)
-    trip_data = extract_trip_info_from_prompt(request.prompt)
-    print("Trip_data", trip_data)
+    # Extract trip info from prompt with trip_id
+    trip_data = extract_trip_info_from_prompt(request.prompt, request.trip_id)
     
-    # If we have a trip_id, try to update existing trip or create new one
+    # If we have a trip_id, handle storage
     if request.trip_id:
         existing_trip = trip_storage.get_trip(request.trip_id)
         if existing_trip:
@@ -56,8 +48,8 @@ def conversation(request: ConversationRequest):
             trip_storage._save_data()
         return {"trip_id": request.trip_id, **trip_data}
     
-    # If trip is complete, create a new trip entry
-    if trip_data.get("is_complete", False):
+    # If trip is complete or user explicitly confirms completion
+    if trip_data.get("is_complete", False) or "complete" in request.prompt.lower():
         trip_id = trip_storage.create_trip(trip_data)
         return {"trip_id": trip_id, **trip_data}
     
@@ -87,12 +79,12 @@ def plan_trip(request: TripRequest):
 
 @router.get("/smart-weather")
 async def weather_from_prompt():
-    trip_data = {
-        "destination": "Washington DC",
-        "origin": "New York",
-        "start_date": "2025-04-20",
-        "end_date": "2025-04-25",
-    }
+    uuid = "abc-128yw981y982"
+    trip_data = trip_storage.get_trip(uuid)
+    if not trip_data:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    trip_data = trip_data["data"]
+    print("Trip_id", uuid)
     
     print("Trip_data", trip_data)
     
@@ -126,18 +118,5 @@ async def restaurants():
         city = "Washington, DC"
         results = await get_places(city, category="restaurants")
         return {"city": city, "restaurants": results}
-    except Exception as e:
-        return {"error": str(e)}
-
-@router.post("/itinerary")
-async def itinerary(req: ItineraryRequest):
-    try:
-        itinerary_text = await get_itinerary_response(
-            "Miami", "Washington DC", "2025-04-25", "2025-04-30"
-        )
-        # itinerary_text = await get_itinerary_response(
-        #     req.source, req.destination, req.start_date, req.end_date
-        # )
-        return {"itinerary": itinerary_text}
     except Exception as e:
         return {"error": str(e)}
