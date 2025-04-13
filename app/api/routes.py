@@ -8,7 +8,8 @@ from app.core.trip_storage import trip_storage
 from typing import Optional
 from datetime import datetime
 from app.core.trip_storage import TripStorage;
-
+from app.llm.itinerary import get_itinerary_response
+from app.core.route_summary import get_route_summary
 # from app.config import settings
 
 router = APIRouter()
@@ -22,6 +23,17 @@ class ConversationRequest(BaseModel):
     prompt: str
     reset: bool = False
     trip_id: Optional[str] = None
+    
+class ItineraryRequest(BaseModel):
+    source: str
+    destination: str
+    start_date: str
+    end_date: str
+
+class RouteRequest(BaseModel):
+    source: str
+    destination: str
+
 
 @router.post("/conversation")
 def conversation(request: ConversationRequest):
@@ -120,3 +132,25 @@ async def restaurants():
         return {"city": city, "restaurants": results}
     except Exception as e:
         return {"error": str(e)}
+
+@router.post("/itinerary")
+async def itinerary(req: ItineraryRequest):
+    try:
+        itinerary_text = await get_itinerary_response(
+            "Miami", "Washington DC", "2025-04-25", "2025-04-30"
+        )
+        # itinerary_text = await get_itinerary_response(
+        #     req.source, req.destination, req.start_date, req.end_date
+        # )
+        return {"itinerary": itinerary_text}
+    except Exception as e:
+        return {"error": str(e)}
+    
+@router.post("/route-summary")
+async def route_summary(req: RouteRequest):
+    try:
+        result = await get_route_summary("Mumbai", "Washington DC")
+        # result = get_route_summary(req.source, req.destination)
+        return {"summary": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
