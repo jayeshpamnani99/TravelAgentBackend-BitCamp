@@ -7,7 +7,6 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash")
 
 async def get_itinerary_response(trip_data) -> str:
-    print("Trip data:", trip_data)
     start_date = trip_data['start_date']
     end_date = trip_data['end_date']
     source = trip_data['origin']

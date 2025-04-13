@@ -120,7 +120,6 @@ async def top_places(TripInfoWrapper: TripInfoWrapper):
     trip_data = get_trip(trip_id)['data']
     if not trip_data:
         raise HTTPException(status_code=404, detail="Trip not found")
-    print("Trip_data", trip_data)
 
     try:
         city = trip_data["destination"]

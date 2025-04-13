@@ -12,7 +12,5 @@ async def get_route_summary(source: str, destination: str) -> str:
         source=source,
         destination=destination
     )
-    print("Final Prompt:", final_prompt)
     response = model.generate_content(final_prompt)
-    print("Route Summary Response:", response.text)
     return response.text.strip()
