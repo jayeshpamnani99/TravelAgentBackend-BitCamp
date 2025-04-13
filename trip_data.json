@@ -1,38 +1,74 @@
 {
-  "1": {
+  "52ace0db-05c6-4ff2-a683-ee3f22adc39c": {
     "data": {
       "origin": "",
-      "destination": "Las Vegas",
-      "start_date": "2025-12-31",
-      "end_date": "2026-01-01",
-      "follow_up": "Could you please let me know where you'll be departing from?",
-      "is_complete": false
-    },
-    "created_at": "2025-04-12T22:25:07.655931",
-    "updated_at": "2025-04-12T22:27:55.753791"
-  },
-  "2": {
-    "data": {
-      "origin": "Denver",
-      "destination": "New York",
-      "start_date": "2025-12-29",
-      "end_date": "2025-12-31",
-      "follow_up": "Do you want to proceed with the trip from Denver to New York from December 29th to December 31st?",
-      "is_complete": true
-    },
-    "created_at": "2025-04-12T22:25:29.906738",
-    "updated_at": "2025-04-12T22:26:53.051122"
-  },
-  "3": {
-    "data": {
-      "origin": "Chicago",
-      "destination": "New York",
+      "destination": "",
       "start_date": "",
       "end_date": "",
-      "follow_up": "Could you please provide the start and end dates for your trip to New York?",
+      "follow_up": "Where are you planning to go, and where are you departing from?",
       "is_complete": false
     },
-    "created_at": "2025-04-12T22:25:49.193123",
-    "updated_at": "2025-04-12T22:30:19.134974"
+    "created_at": "2025-04-12T23:18:47.167395",
+    "updated_at": "2025-04-12T23:18:47.167395"
+  },
+  "a56dd0ea-fe9c-4a74-a20c-eafa2c98ca4c": {
+    "data": {
+      "origin": "Washington, D.C.",
+      "destination": "Miami",
+      "start_date": "",
+      "end_date": "",
+      "follow_up": "Could you please provide the start and end dates for your trip?",
+      "is_complete": false
+    },
+    "created_at": "2025-04-12T23:19:45.130669",
+    "updated_at": "2025-04-12T23:19:45.130669"
+  },
+  "07fa9a98-cd9d-4cdc-bf6f-60776fb1f585": {
+    "data": {
+      "origin": "Washington, D.C.",
+      "destination": "Miami",
+      "start_date": "",
+      "end_date": "",
+      "follow_up": "What dates are you planning to travel?",
+      "is_complete": false
+    },
+    "created_at": "2025-04-12T23:28:25.856875",
+    "updated_at": "2025-04-12T23:28:25.856875"
+  },
+  "8cfdb622-b1bd-4937-83fd-fec03653af6e": {
+    "data": {
+      "origin": "Washington, D.C.",
+      "destination": "Miami",
+      "start_date": "2025-04-23",
+      "end_date": "2025-04-27",
+      "follow_up": "Do you wanna proceed with current information?",
+      "is_complete": true
+    },
+    "created_at": "2025-04-12T23:31:03.313326",
+    "updated_at": "2025-04-12T23:31:48.588044"
+  },
+  "c539521f-faef-4662-b0de-b7c223bc346b": {
+    "data": {
+      "origin": "Washington, D.C.",
+      "destination": "Miami",
+      "start_date": "2025-04-24",
+      "end_date": "2025-04-28",
+      "follow_up": "Do you wanna proceed with current information?",
+      "is_complete": true
+    },
+    "created_at": "2025-04-12T23:34:10.439339",
+    "updated_at": "2025-04-12T23:34:25.507797"
+  },
+  "c4fcc9c4-6ed3-43b3-ac37-43bf59b4e698": {
+    "data": {
+      "origin": "Washington, D.C.",
+      "destination": "Miami",
+      "start_date": "2025-04-14",
+      "end_date": "2025-04-20",
+      "follow_up": "Do you wanna proceed with current information?",
+      "is_complete": true
+    },
+    "created_at": "2025-04-12T23:36:30.114012",
+    "updated_at": "2025-04-12T23:36:30.114012"
   }
 }

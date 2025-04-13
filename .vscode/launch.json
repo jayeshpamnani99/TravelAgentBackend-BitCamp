@@ -1,25 +1,20 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "FastAPI",
+      "name": "Python: FastAPI",
       "type": "python",
       "request": "launch",
-      "module": "uvicorn",
+      "module": "uvicorn", // Use uvicorn as the module
       "args": [
-        "app.fastapi_app:app",
-        "--reload",
+        "app.fastapi_app:app", // Path to your FastAPI app instance
         "--host",
-        "0.0.0.0",
+        "127.0.0.1",
         "--port",
-        "8001"
+        "8000",
+        "--reload" // Enables auto-reload for development
       ],
-      "jinja": true,
-      "justMyCode": true,
-      "python": "${workspaceFolder}/venv/bin/python",
+      "console": "integratedTerminal",
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
       }

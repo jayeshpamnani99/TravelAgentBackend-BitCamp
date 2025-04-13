@@ -15,9 +15,14 @@ from app.core.route_summary import get_route_summary
 router = APIRouter()
 
 class TripRequest(BaseModel):
+    origin: str
     destination: str
-    days: int
-    interests: list[str]
+    start_date: str
+    end_date: str
+    trip_id: str
+
+class TripInfoWrapper(BaseModel):
+    trip_id: str
 
 class ConversationRequest(BaseModel):
     prompt: str
@@ -89,22 +94,16 @@ def plan_trip(request: TripRequest):
     plan = generate_trip_plan(request.destination, request.days, request.interests)
     return {"itinerary": plan}
 
-@router.get("/smart-weather")
-async def weather_from_prompt():
-    uuid = "abc-128yw981y982"
-    trip_data = trip_storage.get_trip(uuid)
+@router.post("/smart-weather")
+async def weather_from_prompt(TripInfoWrapper: TripInfoWrapper):
+    trip_id = TripInfoWrapper.trip_id
+    trip_data = get_trip(trip_id)['data']
     if not trip_data:
         raise HTTPException(status_code=404, detail="Trip not found")
-    trip_data = trip_data["data"]
-    print("Trip_id", uuid)
-    
-    print("Trip_data", trip_data)
     
     # Get weather for both origin and destination
     origin_weather = await get_weather(trip_data["origin"], trip_data["start_date"], trip_data["end_date"])
     dest_weather = await get_weather(trip_data["destination"], trip_data["start_date"], trip_data["end_date"])
-    print("Origin Weather:", origin_weather)
-    print("Destination Weather:", dest_weather)
 
     return {
         "origin_weather": origin_weather,
@@ -115,42 +114,81 @@ async def weather_from_prompt():
         }
     }
 
-@router.get("/top-places")
-async def top_places():
+@router.post("/top-places")
+async def top_places(TripInfoWrapper: TripInfoWrapper):
+    trip_id = TripInfoWrapper.trip_id
+    trip_data = get_trip(trip_id)['data']
+    if not trip_data:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    print("Trip_data", trip_data)
+
     try:
-        city = "Washington, DC"
+        city = trip_data["destination"]
         places = await get_places(city, category="attractions")
         return {"city": city, "places_to_visit": places}
     except Exception as e:
         return {"error": str(e)}
 
-@router.get("/restaurants")
-async def restaurants():
+@router.post("/restaurants")
+async def restaurants(TripInfoWrapper: TripInfoWrapper):
+    trip_id = TripInfoWrapper.trip_id
+    trip_data = get_trip(trip_id)['data']
+    if not trip_data:
+        raise HTTPException(status_code=404, detail="Trip not found")
     try:
-        city = "Washington, DC"
+        city = trip_data["destination"]
         results = await get_places(city, category="restaurants")
         return {"city": city, "restaurants": results}
     except Exception as e:
         return {"error": str(e)}
 
-@router.post("/itinerary")
-async def itinerary(req: ItineraryRequest):
-    try:
-        itinerary_text = await get_itinerary_response(
-            "Miami", "Washington DC", "2025-04-25", "2025-04-30"
-        )
-        # itinerary_text = await get_itinerary_response(
-        #     req.source, req.destination, req.start_date, req.end_date
-        # )
-        return {"itinerary": itinerary_text}
-    except Exception as e:
-        return {"error": str(e)}
+# @router.post("/itinerary")
+# async def itinerary(req: ItineraryRequest):
+#     try:
+#         itinerary_text = await get_itinerary_response(
+#             "Miami", "Washington DC", "2025-04-25", "2025-04-30"
+#         )
+#         # itinerary_text = await get_itinerary_response(
+#         #     req.source, req.destination, req.start_date, req.end_date
+#         # )
+#         return {"itinerary": itinerary_text}
+#     except Exception as e:
+#         return {"error": str(e)}
     
 @router.post("/route-summary")
-async def route_summary(req: RouteRequest):
+async def route_summary(TripInfoWrapper: TripInfoWrapper):
+    trip_id = TripInfoWrapper.trip_id
+    trip_data = get_trip(trip_id)['data']
+    if not trip_data:
+        raise HTTPException(status_code=404, detail="Trip not found")
     try:
-        result = await get_route_summary("Mumbai", "Washington DC")
+        result = await get_route_summary(trip_data["origin"], trip_data["destination"])
         # result = get_route_summary(req.source, req.destination)
         return {"summary": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.post("/hotels")
+async def hotels(TripInfoWrapper: TripInfoWrapper):
+    trip_id = TripInfoWrapper.trip_id
+    trip_data = get_trip(trip_id)['data']
+    if not trip_data:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    try:
+        city = trip_data["destination"]
+        results = await get_places(city, category="hotels")
+        return {"city": city, "hotels": results}
+    except Exception as e:
+        return {"error": str(e)}
+    
+@router.post("/itinerary")
+async def itinerary(TripInfoWrapper: TripInfoWrapper):
+    trip_id = TripInfoWrapper.trip_id
+    trip_data = get_trip(trip_id)['data']
+    if not trip_data:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    try:
+        itinerary_text = await get_itinerary_response(trip_data)
+        return {"itinerary": itinerary_text}
+    except Exception as e:
+        return {"error": str(e)}

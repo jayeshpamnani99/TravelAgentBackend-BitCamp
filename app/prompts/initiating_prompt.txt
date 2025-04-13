@@ -5,6 +5,7 @@ Provide correct names for the locations.
 Keep the conversation active until you have all the information. 
 You can ask follow-up questions to gather missing details that help in building the trip plan. 
 Assume the dates are for the year 2025.
+Origin and Destination should be city names
 
 Return the result **only in JSON** with the following keys:
 - origin
